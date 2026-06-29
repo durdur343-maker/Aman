@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة الإجازات الطويلة</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            font-family: 'Tahoma', 'Segoe UI', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #e8f0fe 0%, #d4e4f7 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+            padding: 30px;
+            margin-bottom: 30px;
+            transition: 0.3s;
+        }
+        .main-card:hover {
+            box-shadow: 0 15px 50px rgba(0,0,0,0.18);
+        }
+        .page-title {
+            color: #1a237e;
+            font-weight: 800;
+            font-size: 28px;
+            border-right: 6px solid #3f51b5;
+            padding-right: 18px;
+        }
+        .page-title i {
+            color: #3f51b5;
+            margin-left: 12px;
+        }
+        .sub-title {
+            color: #546e7a;
+            font-size: 14px;
+            margin-top: 8px;
+            padding-right: 24px;
+        }
+        .form-label {
+            font-weight: 700;
+            color: #1a237e;
+            font-size: 14px;
+        }
+        .form-label i {
+            margin-left: 8px;
+            color: #3f51b5;
+        }
+        .form-control {
+            border-radius: 12px;
+            border: 2px solid #e3e8ee;
+            padding: 12px 16px;
+            transition: 0.3s;
+            font-size: 15px;
+        }
+        .form-control:focus {
+            border-color: #3f51b5;
+            box-shadow: 0 0 0 0.2rem rgba(63,81,181,0.2);
+        }
+        .form-control:disabled {
+            background-color: #f5f7fa;
+            color: #1a237e;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .btn-calculate {
+            background: linear-gradient(135deg, #3f51b5, #283593);
+            border: none;
+            border-radius: 12px;
+            padding: 14px 40px;
+            font-weight: 700;
+            color: white;
+            font-size: 16px;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(63,81,181,0.4);
+            width: 100%;
+        }
+        .btn-calculate:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(63,81,181,0.5);
+            color: white;
+        }
+        .btn-calculate i {
+            margin-left: 10px;
+        }
+        .btn-danger-custom {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            border: none;
+            border-radius: 10px;
+            padding: 6px 14px;
+            color: white;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .btn-danger-custom:hover {
+            transform: scale(1.1);
+            color: white;
+        }
+        .btn-success-custom {
+            background: linear-gradient(135deg, #27ae60, #1e8449);
+            border: none;
+            border-radius: 10px;
+            padding: 8px 20px;
+            color: white;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .btn-success-custom:hover {
+            transform: scale(1.05);
+            color: white;
+        }
+        .table-container {
+            overflow-x: auto;
+            border-radius: 15px;
+            border: 1px solid #e3e8ee;
+        }
+        .table {
+            margin-bottom: 0;
+        }
+        .table thead {
+            background: linear-gradient(135deg, #1a237e, #283593);
+            color: white;
+        }
+        .table thead th {
+            padding: 14px 12px;
+            font-weight: 700;
+            font-size: 14px;
+            border: none;
+            text-align: center;
+        }
+        .table tbody td {
+            padding: 12px;
+            vertical-align: middle;
+            text-align: center;
+            font-size: 14px;
+        }
+        .table tbody tr {
+            transition: 0.2s;
+            border-bottom: 1px solid #f0f2f5;
+        }
+        .table tbody tr:hover {
+            background-color: #f5f7fc;
+        }
+        .badge-return {
+            background: #d4edda;
+            color: #155724;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+        .badge-days {
+            background: #cce5ff;
+            color: #004085;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #b0bec5;
+        }
+        .empty-state i {
+            font-size: 70px;
+            margin-bottom: 15px;
+            color: #cfd8dc;
+        }
+        .empty-state h5 {
+            color: #78909c;
+        }
+        .stat-box {
+            background: white;
+            border-radius: 15px;
+            padding: 18px;
+            text-align: center;
+            border-bottom: 4px solid #3f51b5;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .stat-box .number {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1a237e;
+        }
+        .stat-box .label {
+            font-size: 13px;
+            color: #78909c;
+            font-weight: 600;
+        }
+        .highlight-box {
+            background: linear-gradient(135deg, #e8eaf6, #c5cae9);
+            border-radius: 15px;
+            padding: 18px 25px;
+            border-right: 5px solid #3f51b5;
+        }
+        .highlight-box .label {
+            font-weight: 600;
+            color: #1a237e;
+            font-size: 13px;
+        }
+        .highlight-box .value {
+            font-size: 20px;
+            font-weight: 800;
+            color: #283593;
+        }
+        @media (max-width: 768px) {
+            .main-card {
+                padding: 18px;
+            }
+            .stat-box {
+                margin-bottom: 12px;
+            }
+            .page-title {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-lg">
+    
+    <!-- العنوان -->
+    <div class="mb-4">
+        <h1 class="page-title">
+            <i class="fas fa-calendar-plus"></i> إدارة الإجازات الطويلة
+        </h1>
+        <p class="sub-title"><i class="fas fa-chevron-left"></i> أدخل بيانات الإجازة، اضغط "احسب" لحساب تاريخ المباشرة وإضافتها للقائمة</p>
+    </div>
+
+    <!-- نموذج الإدخال -->
+    <div class="main-card">
+        <div class="row g-4">
+            <div class="col-md-3">
+                <label class="form-label"><i class="fas fa-user"></i> اسم المنتسب</label>
+                <input type="text" class="form-control" id="empName" placeholder="أدخل الاسم الكامل">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label"><i class="fas fa-calendar-alt"></i> تاريخ الإجازة</label>
+                <input type="date" class="form-control" id="startDate">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label"><i class="fas fa-clock"></i> عدد الأيام</label>
+                <input type="number" class="form-control" id="daysCount" placeholder="مثلاً 30" min="1">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label"><i class="fas fa-calendar-check"></i> تاريخ المباشرة</label>
+                <input type="text" class="form-control" id="returnDate" disabled placeholder="سيُحسب تلقائياً">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button class="btn btn-calculate" id="calculateBtn">
+                    <i class="fas fa-calculator"></i> احسب وأضف
+                </button>
+            </div>
+        </div>
+
+        <!-- عرض تاريخ المباشرة بشكل منفصل (اختياري) -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="highlight-box d-flex justify-content-between align-items-center flex-wrap">
+                    <div>
+                        <span class="label"><i class="fas fa-arrow-left"></i> تاريخ المباشرة المحسوب:</span>
+                        <span class="value me-3" id="returnDisplay">لم يتم الحساب بعد</span>
+                    </div>
+                    <div>
+                        <span class="label"><i class="fas fa-info-circle"></i> سيتم إضافة الإجازة للجدول عند الضغط على احسب</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- الإحصائيات -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-6">
+            <div class="stat-box">
+                <div class="number" id="totalCount">0</div>
+                <div class="label">إجمالي الإجازات</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stat-box" style="border-bottom-color: #27ae60;">
+                <div class="number" id="activeCount">0</div>
+                <div class="label">جارية</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stat-box" style="border-bottom-color: #f39c12;">
+                <div class="number" id="upcomingCount">0</div>
+                <div class="label">قادمة</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stat-box" style="border-bottom-color: #e74c3c;">
+                <div class="number" id="endedCount">0</div>
+                <div class="label">منتهية</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- جدول الإجازات -->
+    <div class="main-card">
+        <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+            <h5 style="color: #1a237e; font-weight: 700;">
+                <i class="fas fa-list-ul" style="color: #3f51b5;"></i> قائمة الإجازات
+            </h5>
+            <div>
+                <button class="btn btn-success-custom" onclick="exportCSV()">
+                    <i class="fas fa-file-excel"></i> تصدير CSV
+                </button>
+                <button class="btn btn-danger-custom" onclick="clearAll()">
+                    <i class="fas fa-trash-alt"></i> مسح الكل
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="table" id="vacationTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>الاسم</th>
+                        <th>تاريخ الإجازة</th>
+                        <th>عدد الأيام</th>
+                        <th>تاريخ المباشرة</th>
+                        <th>الحالة</th>
+                        <th>إجراء</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <i class="fas fa-umbrella-beach"></i>
+                                <h5>لا توجد إجازات مسجلة</h5>
+                                <p class="text-muted">أدخل البيانات واضغط "احسب وأضف"</p>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ===== المتغيرات =====
+    let vacations = [];
+    let counter = 1;
+
+    // ===== عناصر DOM =====
+    const empName = document.getElementById('empName');
+    const startDate = document.getElementById('startDate');
+    const daysCount = document.getElementById('daysCount');
+    const returnDate = document.getElementById('returnDate');
+    const returnDisplay = document.getElementById('returnDisplay');
+    const calculateBtn = document.getElementById('calculateBtn');
+    const tableBody = document.getElementById('tableBody');
+
+    // ===== دالة حساب تاريخ المباشرة =====
+    function calculateReturnDate() {
+        const start = startDate.value;
+        const days = parseInt(daysCount.value);
+
+        if (!start || !days || days < 1) {
+            returnDate.value = '';
+            returnDisplay.textContent = 'يرجى إدخال تاريخ وعدد أيام صحيح';
+            returnDisplay.style.color = '#e74c3c';
+            return null;
+        }
+
+        const startObj = new Date(start);
+        const returnObj = new Date(startObj);
+        returnObj.setDate(returnObj.getDate() + days);
+
+        // تنسيق التاريخ
+        const day = String(returnObj.getDate()).padStart(2, '0');
+        const month = String(returnObj.getMonth() + 1).padStart(2, '0');
+        const year = returnObj.getFullYear();
+        const formatted = `${day}/${month}/${year}`;
+
+        returnDate.value = formatted;
+        returnDisplay.textContent = formatted;
+        returnDisplay.style.color = '#1a237e';
+
+        return returnObj;
+    }
+
+    // ===== دالة تحديد الحالة =====
+    function getStatus(startDateStr, returnDateStr) {
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const start = new Date(startDateStr);
+        start.setHours(0,0,0,0);
+        const end = new Date(returnDateStr);
+        end.setHours(0,0,0,0);
+
+        if (end < today) return { text: 'منتهية', class: 'badge bg-danger text-white' };
+        if (start <= today && end >= today) return { text: 'جارية', class: 'badge bg-success text-white' };
+        return { text: 'قادمة', class: 'badge bg-warning text-dark' };
+    }
+
+    // ===== إضافة إجازة =====
+    function addVacation() {
+        const name = empName.value.trim();
+        const start = startDate.value;
+        const days = parseInt(daysCount.value);
+
+        // التحقق من صحة البيانات
+        if (!name) { alert('يرجى إدخال اسم المنتسب'); return; }
+        if (!start) { alert('يرجى اختيار تاريخ الإجازة'); return; }
+        if (!days || days < 1) { alert('يرجى إدخال عدد أيام صحيح'); return; }
+
+        // حساب تاريخ المباشرة
+        const returnObj = calculateReturnDate();
+        if (!returnObj) return;
+
+        const returnFormatted = returnDate.value;
+
+        // تحديد الحالة
+        const status = getStatus(start, returnObj.toISOString().split('T')[0]);
+
+        // إنشاء كائن الإجازة
+        const vacation = {
+            id: counter++,
+            name: name,
+            startDate: start,
+            days: days,
+            returnDate: returnFormatted,
+            statusText: status.text,
+            statusClass: status.class
+        };
+
+        // إضافة للقائمة
+        vacations.push(vacation);
+
+        // تحديث الجدول والإحصائيات
+        renderTable();
+        updateStats();
+
+        // تنظيف الحقول (نحتفظ بالاسم فقط لسهولة الإضافة المتتالية)
+        startDate.value = '';
+        daysCount.value = '';
+        returnDate.value = '';
+        returnDisplay.textContent = 'تمت الإضافة بنجاح ✅';
+        returnDisplay.style.color = '#27ae60';
+        empName.focus();
+        empName.select();
+
+        // رسالة نجاح
+        showToast('تم إضافة الإجازة بنجاح!');
+    }
+
+    // ===== عرض الجدول =====
+    function renderTable() {
+        if (vacations.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <i class="fas fa-umbrella-beach"></i>
+                            <h5>لا توجد إجازات مسجلة</h5>
+                            <p class="text-muted">أدخل البيانات واضغط "احسب وأضف"</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        // ترتيب تنازلي حسب تاريخ البدء
+        const sorted = [...vacations].sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+
+        tableBody.innerHTML = sorted.map((v, index) => `
+            <tr>
+                <td><strong>${index + 1}</strong></td>
+                <td><strong>${v.name}</strong></td>
+                <td>${formatDate(v.startDate)}</td>
+                <td><span class="badge-days">${v.days} يوم</span></td>
+                <td><span class="badge-return">${v.returnDate}</span></td>
+                <td><span class="${v.statusClass}" style="padding: 6px 16px; border-radius: 20px;">${v.statusText}</span></td>
+                <td>
+                    <button class="btn btn-danger-custom" onclick="deleteVacation(${v.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // ===== حذف إجازة =====
+    function deleteVacation(id) {
+        if (confirm('هل أنت متأكد من حذف هذه الإجازة؟')) {
+            vacations = vacations.filter(v => v.id !== id);
+            renderTable();
+            updateStats();
+            showToast('تم حذف الإجازة.');
+        }
+    }
+
+    // ===== مسح الكل =====
+    function clearAll() {
+        if (vacations.length === 0) return;
+        if (confirm('هل أنت متأكد من مسح جميع الإجازات؟')) {
+            vacations = [];
+            counter = 1;
+            renderTable();
+            updateStats();
+            showToast('تم مسح جميع الإجازات.');
+        }
+    }
+
+    // ===== تحديث الإحصائيات =====
+    function updateStats() {
+        const today = new Date();
+        today.setHours(0,0,0,0);
+
+        let active = 0, upcoming = 0, ended = 0;
+
+        vacations.forEach(v => {
+            const start = new Date(v.startDate);
+            start.setHours(0,0,0,0);
+            // نحتاج تاريخ المباشرة من النص المحفوظ
+            const parts = v.returnDate.split('/');
+            const end = new Date(parts[2], parts[1] - 1, parts[0]);
+            end.setHours(0,0,0,0);
+
+            if (end < today) ended++;
+            else if (start <= today && end >= today) active++;
+            else upcoming++;
+        });
+
+        document.getElementById('totalCount').textContent = vacations.length;
+        document.getElementById('activeCount').textContent = active;
+        document.getElementById('upcomingCount').textContent = upcoming;
+        document.getElementById('endedCount').textContent = ended;
+    }
+
+    // ===== تصدير CSV =====
+    function exportCSV() {
+        if (vacations.length === 0) {
+            alert('لا توجد بيانات للتصدير.');
+            return;
+        }
+
+        const headers = ['الاسم', 'تاريخ الإجازة', 'عدد الأيام', 'تاريخ المباشرة', 'الحالة'];
+        let csv = '\uFEFF';
+        csv += headers.join(',') + '\n';
+        vacations.forEach(v => {
+            csv += `${v.name},${formatDate(v.startDate)},${v.days},${v.returnDate},${v.statusText}\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `الإجازات_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+    }
+
+    // ===== أدوات مساعدة =====
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
+    function showToast(message) {
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a237e;
+            color: white;
+            padding: 14px 35px;
+            border-radius: 12px;
+            font-weight: 700;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.4s;
+            font-size: 15px;
+            text-align: center;
+        `;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.style.opacity = '1', 50);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 400);
+        }, 2500);
+    }
+
+    // ===== ربط الأحداث =====
+    // زر احسب
+    calculateBtn.addEventListener('click', function() {
+        addVacation();
+    });
+
+    // حساب تلقائي عند تغيير التاريخ أو عدد الأيام (معاينة فقط)
+    startDate.addEventListener('change', calculateReturnDate);
+    daysCount.addEventListener('input', calculateReturnDate);
+
+    // الضغط على Enter في أي حقل ينفذ الإضافة
+    document.querySelectorAll('#empName, #startDate, #daysCount').forEach(input => {
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addVacation();
+            }
+        });
+    });
+
+    // ===== تحميل أولي =====
+    renderTable();
+    updateStats();
+</script>
+
+</body>
+</html>
