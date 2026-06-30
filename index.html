@@ -81,7 +81,6 @@
         .badge-type.seniority { background: #d4edda; color: #155724; }
         .badge-type.sick { background: #f8d7da; color: #721c24; }
         .badge-type.maternity { background: #fce4ec; color: #880e4f; }
-        .badge-type.study { background: #e3f2fd; color: #0d47a1; }
         .badge-type.unpaid { background: #e2e3e5; color: #383d41; }
         .badge-type.other { background: #e8e8e8; color: #555; }
         .badge-type.default { background: #e9ecef; color: #495057; }
@@ -256,7 +255,7 @@
     }
 
     // ============================================
-    // 🔥 دوال معالجة التاريخ - بدون استخدام Date
+    // 🔥 دوال معالجة التاريخ - مع إضافة يوم عند العرض
     // ============================================
 
     function cleanDate(dateStr) {
@@ -274,6 +273,40 @@
             }
         }
         return dateStr;
+    }
+
+    // ===== دالة إضافة يوم للتاريخ (للعرض فقط) =====
+    function addOneDayForDisplay(dateStr) {
+        if (!dateStr) return '';
+        const cleaned = cleanDate(dateStr);
+        const parts = cleaned.split('/');
+        if (parts.length !== 3) return cleaned;
+        
+        let day = parseInt(parts[0]);
+        let month = parseInt(parts[1]);
+        let year = parseInt(parts[2]);
+        day += 1;
+        
+        const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        function isLeapYear(y) { return (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0); }
+        
+        if (day > daysInMonth[month - 1] + (month === 2 && isLeapYear(year) ? 1 : 0)) {
+            day = 1;
+            month++;
+            if (month > 12) { month = 1; year++; }
+        }
+        
+        return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
+    }
+
+    // ===== دالة تنسيق التاريخ للعرض =====
+    function formatDateForDisplay(dateStr) {
+        if (!dateStr) return '—';
+        let cleaned = cleanDate(dateStr);
+        if (cleaned.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+            cleaned = addOneDayForDisplay(cleaned);
+        }
+        return cleaned || '—';
     }
 
     function addDaysToDate(dateStr, daysToAdd) {
@@ -300,21 +333,6 @@
         return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
     }
 
-    function formatDateForDisplay(dateStr) {
-        if (!dateStr) return '—';
-        const cleaned = cleanDate(dateStr);
-        return cleaned || '—';
-    }
-
-    function convertToStorageFormat(dateStr) {
-        if (!dateStr) return '';
-        if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) return dateStr;
-        const parts = dateStr.split('/');
-        if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
-        return dateStr;
-    }
-
-    // ===== تحديث دالة getTypeClass للأنواع الجديدة =====
     function getTypeClass(type) {
         const map = {
             'اعتيادية': 'seniority',
@@ -337,7 +355,6 @@
         }
     }
 
-    // ===== إعداد التقويم =====
     $(document).ready(function() {
         $('#leaveDate').datepicker({
             changeMonth: true,
@@ -376,7 +393,6 @@
 
     document.getElementById('daysCount').addEventListener('input', calculateReturnDate);
 
-    // ===== عرض الجدول =====
     function renderTable(data) {
         const tbody = document.getElementById('leaveTableBody');
         const displayData = data || (isFiltered ? filteredLeaves : leaves);
@@ -409,7 +425,6 @@
         document.getElementById('totalDays').textContent = totalDays;
     }
 
-    // ===== دوال الفلترة =====
     function applyFilters() {
         const fromDate = document.getElementById('filterFrom').value;
         const toDate = document.getElementById('filterTo').value;
@@ -444,7 +459,6 @@
         else clearFilters();
     });
 
-    // ===== الاتصال بقاعدة البيانات =====
     async function makeRequest(action, data) {
         try {
             const params = new URLSearchParams();
@@ -459,7 +473,6 @@
         }
     }
 
-    // ===== إضافة إلى قاعدة البيانات =====
     async function addToDatabase() {
         const name = document.getElementById('employeeName').value.trim();
         const leaveDateRaw = document.getElementById('leaveDate').value;
@@ -473,18 +486,13 @@
         if (!days || days < 1) { showToast('⚠️ الرجاء إدخال عدد أيام صحيح', 'error'); return; }
         if (!returnDateRaw) { showToast('⚠️ تاريخ المباشرة غير صحيح', 'error'); return; }
 
-        const leaveDateCleaned = cleanDate(leaveDateRaw);
-        const returnDateCleaned = cleanDate(returnDateRaw);
-        const leaveDateStorage = convertToStorageFormat(leaveDateCleaned);
-        const returnDateStorage = convertToStorageFormat(returnDateCleaned);
-
         const btn = document.querySelector('.btn-add');
         btn.disabled = true;
         btn.innerHTML = '<span class="loading-spinner"></span> جاري الحفظ...';
 
         try {
             const result = await makeRequest('addLeave', {
-                name, leaveDate: leaveDateStorage, days, returnDate: returnDateStorage, type, notes
+                name, leaveDate: leaveDateRaw, days, returnDate: returnDateRaw, type, notes
             });
 
             if (result.success) {
@@ -507,7 +515,6 @@
         }
     }
 
-    // ===== تحميل من قاعدة البيانات =====
     async function loadFromDatabase() {
         if (isLoading) return;
         isLoading = true;
@@ -534,7 +541,6 @@
         }
     }
 
-    // ===== تحديث البيانات =====
     async function refreshData() {
         const btn = document.getElementById('refreshBtn');
         btn.disabled = true;
@@ -545,7 +551,6 @@
         showToast('✅ تم تحديث البيانات بنجاح', 'success');
     }
 
-    // ===== حذف من قاعدة البيانات =====
     async function deleteFromDatabase(id) {
         if (!confirm('⚠️ هل أنت متأكد من حذف هذه الإجازة؟')) return;
         const btn = event.target;
@@ -569,7 +574,6 @@
         }
     }
 
-    // ===== تصدير إلى Word =====
     function exportToWord() {
         const data = isFiltered ? filteredLeaves : leaves;
         if (data.length === 0) {
@@ -631,7 +635,6 @@
         showToast('✅ تم حفظ التقرير بصيغة Word بنجاح', 'success');
     }
 
-    // ===== اختبار الاتصال =====
     async function testConnection() {
         try {
             const result = await makeRequest('testConnection', null);
@@ -640,7 +643,6 @@
         } catch { setStatus('offline'); return false; }
     }
 
-    // ===== تحميل الصفحة =====
     window.onload = async function() {
         console.log('📋 نظام إدارة الإجازات - ديوان محافظة');
         console.log('🔗 API URL:', API_URL);
