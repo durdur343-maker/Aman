@@ -3,652 +3,824 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة الإجازات الطويلة</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>نظام إدارة الإجازات - ديوان محافظة</title>
+    
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/smoothness/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
     <style>
-        * {
-            font-family: 'Tahoma', 'Segoe UI', sans-serif;
-        }
-        body {
-            background: linear-gradient(135deg, #e8f0fe 0%, #d4e4f7 100%);
-            min-height: 100vh;
-            padding: 30px 20px;
-        }
-        .main-card {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
-            padding: 30px;
-            margin-bottom: 30px;
-            transition: 0.3s;
-        }
-        .main-card:hover {
-            box-shadow: 0 15px 50px rgba(0,0,0,0.18);
-        }
-        .page-title {
-            color: #1a237e;
-            font-weight: 800;
-            font-size: 28px;
-            border-right: 6px solid #3f51b5;
-            padding-right: 18px;
-        }
-        .page-title i {
-            color: #3f51b5;
-            margin-left: 12px;
-        }
-        .sub-title {
-            color: #546e7a;
-            font-size: 14px;
-            margin-top: 8px;
-            padding-right: 24px;
-        }
-        .form-label {
-            font-weight: 700;
-            color: #1a237e;
-            font-size: 14px;
-        }
-        .form-label i {
-            margin-left: 8px;
-            color: #3f51b5;
-        }
-        .form-control {
-            border-radius: 12px;
-            border: 2px solid #e3e8ee;
-            padding: 12px 16px;
-            transition: 0.3s;
-            font-size: 15px;
-        }
-        .form-control:focus {
-            border-color: #3f51b5;
-            box-shadow: 0 0 0 0.2rem rgba(63,81,181,0.2);
-        }
-        .form-control:disabled {
-            background-color: #f5f7fa;
-            color: #1a237e;
-            font-weight: 600;
-            font-size: 16px;
-        }
-        .btn-calculate {
-            background: linear-gradient(135deg, #3f51b5, #283593);
-            border: none;
-            border-radius: 12px;
-            padding: 14px 40px;
-            font-weight: 700;
-            color: white;
-            font-size: 16px;
-            transition: 0.3s;
-            box-shadow: 0 4px 15px rgba(63,81,181,0.4);
-            width: 100%;
-        }
-        .btn-calculate:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(63,81,181,0.5);
-            color: white;
-        }
-        .btn-calculate i {
-            margin-left: 10px;
-        }
-        .btn-delete-single {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            border: none;
-            border-radius: 10px;
-            padding: 7px 16px;
-            color: white;
-            font-weight: 600;
-            transition: 0.3s;
-            font-size: 13px;
-        }
-        .btn-delete-single:hover {
-            transform: scale(1.1);
-            color: white;
-        }
-        .btn-delete-all {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            border: none;
-            border-radius: 10px;
-            padding: 8px 22px;
-            color: white;
-            font-weight: 700;
-            transition: 0.3s;
-            font-size: 14px;
-        }
-        .btn-delete-all:hover {
-            transform: scale(1.05);
-            color: white;
-        }
-        .btn-export {
-            background: linear-gradient(135deg, #27ae60, #1e8449);
-            border: none;
-            border-radius: 10px;
-            padding: 8px 22px;
-            color: white;
-            font-weight: 700;
-            transition: 0.3s;
-            font-size: 14px;
-        }
-        .btn-export:hover {
-            transform: scale(1.05);
-            color: white;
-        }
-        .table-container {
-            overflow-x: auto;
-            border-radius: 15px;
-            border: 1px solid #e3e8ee;
-        }
-        .table {
-            margin-bottom: 0;
-        }
-        .table thead {
-            background: linear-gradient(135deg, #1a237e, #283593);
-            color: white;
-        }
-        .table thead th {
-            padding: 14px 12px;
-            font-weight: 700;
-            font-size: 14px;
-            border: none;
-            text-align: center;
-        }
-        .table tbody td {
-            padding: 12px;
-            vertical-align: middle;
-            text-align: center;
-            font-size: 14px;
-        }
-        .table tbody tr {
-            transition: 0.2s;
-            border-bottom: 1px solid #f0f2f5;
-        }
-        .table tbody tr:hover {
-            background-color: #f5f7fc;
-        }
-        .badge-return {
-            background: #d4edda;
-            color: #155724;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-weight: 700;
-        }
-        .badge-days {
-            background: #cce5ff;
-            color: #004085;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-weight: 700;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 50px 20px;
-            color: #b0bec5;
-        }
-        .empty-state i {
-            font-size: 70px;
-            margin-bottom: 15px;
-            color: #cfd8dc;
-        }
-        .empty-state h5 {
-            color: #78909c;
-        }
-        .stat-box {
-            background: white;
-            border-radius: 15px;
-            padding: 18px;
-            text-align: center;
-            border-bottom: 4px solid #3f51b5;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        .stat-box .number {
-            font-size: 32px;
-            font-weight: 800;
-            color: #1a237e;
-        }
-        .stat-box .label {
-            font-size: 13px;
-            color: #78909c;
-            font-weight: 600;
-        }
-        .highlight-box {
-            background: linear-gradient(135deg, #e8eaf6, #c5cae9);
-            border-radius: 15px;
-            padding: 18px 25px;
-            border-right: 5px solid #3f51b5;
-        }
-        .highlight-box .label {
-            font-weight: 600;
-            color: #1a237e;
-            font-size: 13px;
-        }
-        .highlight-box .value {
-            font-size: 20px;
-            font-weight: 800;
-            color: #283593;
-        }
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        @media (max-width: 768px) {
-            .main-card {
-                padding: 18px;
-            }
-            .stat-box {
-                margin-bottom: 12px;
-            }
-            .page-title {
-                font-size: 22px;
-            }
-            .action-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 20px; padding: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+        .header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px; }
+        .header h1 { color: #2c3e50; font-size: 28px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .header h1 span { background: #1a5276; color: white; font-size: 14px; padding: 4px 16px; border-radius: 30px; }
+        .status-bar { background: #e8f5e9; padding: 10px 20px; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+        .status-bar .status-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-left: 8px; }
+        .status-bar .status-dot.online { background: #4caf50; }
+        .status-bar .status-dot.offline { background: #f44336; }
+        .status-bar .status-dot.loading { background: #f39c12; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        .form-section { background: #f8f9fa; padding: 25px; border-radius: 15px; margin-bottom: 30px; border-right: 5px solid #1a5276; }
+        .form-section h2 { color: #2c3e50; font-size: 20px; margin-bottom: 20px; }
+        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { font-weight: 600; color: #34495e; font-size: 13px; margin-bottom: 5px; }
+        .form-group label .auto { color: #27ae60; font-size: 11px; font-weight: normal; }
+        .form-group label .manual { color: #e67e22; font-size: 11px; font-weight: normal; }
+        .form-group input, .form-group select, .form-group textarea { padding: 10px 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 14px; transition: 0.3s; background: white; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #1a5276; outline: none; box-shadow: 0 0 0 3px rgba(26,82,118,0.2); }
+        .form-group input[readonly] { background: #eef2f7; color: #2c3e50; cursor: not-allowed; }
+        .date-input-wrapper { position: relative; }
+        .date-input-wrapper input { width: 100%; padding-left: 40px; cursor: pointer; }
+        .date-input-wrapper .date-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 18px; pointer-events: none; color: #1a5276; }
+        .ui-datepicker { background: white; border: 1px solid #ddd; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); padding: 10px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; z-index: 1000 !important; width: 280px; }
+        .ui-datepicker .ui-datepicker-header { background: #1a5276; color: white; border-radius: 8px; padding: 8px 0; border: none; }
+        .ui-datepicker .ui-datepicker-title { font-size: 16px; font-weight: 600; color: white; }
+        .ui-datepicker .ui-datepicker-prev, .ui-datepicker .ui-datepicker-next { background: rgba(255,255,255,0.2); border-radius: 50%; cursor: pointer; border: none; color: white; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; top: 6px; }
+        .ui-datepicker .ui-datepicker-prev:hover, .ui-datepicker .ui-datepicker-next:hover { background: rgba(255,255,255,0.4); }
+        .ui-datepicker .ui-datepicker-calendar { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        .ui-datepicker .ui-datepicker-calendar th { color: #1a5276; font-weight: 600; font-size: 13px; padding: 4px 0; text-align: center; border: none; }
+        .ui-datepicker .ui-datepicker-calendar td { padding: 2px; text-align: center; border: none; }
+        .ui-datepicker .ui-datepicker-calendar td a { display: block; padding: 6px 0; border-radius: 8px; color: #2c3e50; font-weight: 500; text-decoration: none; font-size: 14px; transition: 0.2s; border: none; background: transparent; }
+        .ui-datepicker .ui-datepicker-calendar td a:hover { background: #e8f0fe; color: #1a5276; }
+        .ui-datepicker .ui-datepicker-calendar td a.ui-state-active { background: #1a5276; color: white; font-weight: 700; }
+        .ui-datepicker .ui-datepicker-calendar td a.ui-state-highlight { background: #eaf2f8; color: #1a5276; font-weight: 600; }
+        .ui-datepicker .ui-datepicker-current-day a { background: #1a5276 !important; color: white !important; font-weight: 700 !important; }
+        .form-actions { margin-top: 20px; }
+        .btn-add { background: #1a5276; color: white; border: none; padding: 12px 35px; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; width: 100%; }
+        .btn-add:hover { background: #154360; transform: scale(1.02); box-shadow: 0 5px 15px rgba(26,82,118,0.4); }
+        .btn-add:disabled { opacity: 0.6; cursor: not-allowed; }
+        .filter-section { background: #eaf2f8; padding: 20px; border-radius: 15px; margin-bottom: 20px; border-right: 5px solid #2b5797; display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; }
+        .filter-section .filter-group { display: flex; flex-direction: column; flex: 1; min-width: 130px; }
+        .filter-section .filter-group label { font-weight: 600; color: #2c3e50; font-size: 13px; margin-bottom: 5px; }
+        .filter-section .filter-group input, .filter-section .filter-group select { padding: 10px 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 14px; background: white; }
+        .filter-section .filter-group input:focus, .filter-section .filter-group select:focus { border-color: #2b5797; outline: none; box-shadow: 0 0 0 3px rgba(43,87,151,0.2); }
+        .filter-section .btn-filter { background: #2b5797; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .filter-section .btn-filter:hover { background: #1a3f6a; transform: scale(1.02); }
+        .filter-section .btn-clear { background: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .filter-section .btn-clear:hover { background: #7f8c8d; transform: scale(1.02); }
+        .table-toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; padding: 10px 15px; background: #f8f9fa; border-radius: 12px; border: 1px solid #e9ecef; }
+        .table-toolbar .toolbar-left { display: flex; gap: 10px; flex-wrap: wrap; }
+        .table-toolbar .toolbar-right { font-size: 14px; color: #6c757d; }
+        .btn-refresh { background: #27ae60; color: white; border: none; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 6px; }
+        .btn-refresh:hover { background: #219a52; transform: scale(1.02); }
+        .btn-refresh:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-word { background: #2b5797; color: white; border: none; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 6px; }
+        .btn-word:hover { background: #1a3f6a; transform: scale(1.02); }
+        .table-wrapper { overflow-x: auto; border-radius: 15px; border: 1px solid #e9ecef; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 800px; }
+        thead { background: #1a5276; color: white; }
+        thead th { padding: 14px 12px; text-align: center; font-weight: 600; white-space: nowrap; }
+        thead th .badge { font-size: 10px; background: rgba(255,255,255,0.2); padding: 2px 10px; border-radius: 20px; display: inline-block; margin-right: 5px; }
+        tbody td { padding: 12px; text-align: center; border-bottom: 1px solid #f1f3f5; vertical-align: middle; }
+        tbody tr:hover { background: #f8f9fa; }
+        tbody tr:last-child td { border-bottom: none; }
+        .badge-type { display: inline-block; padding: 4px 14px; border-radius: 30px; font-size: 12px; font-weight: 600; }
+        .badge-type.seniority { background: #d4edda; color: #155724; }
+        .badge-type.sick { background: #f8d7da; color: #721c24; }
+        .badge-type.maternity { background: #fce4ec; color: #880e4f; }
+        .badge-type.study { background: #e3f2fd; color: #0d47a1; }
+        .badge-type.unpaid { background: #e2e3e5; color: #383d41; }
+        .badge-type.default { background: #e9ecef; color: #495057; }
+        .btn-delete { background: #e74c3c; color: white; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; transition: 0.3s; }
+        .btn-delete:hover { background: #c0392b; transform: scale(1.05); }
+        .btn-delete:disabled { opacity: 0.5; cursor: not-allowed; }
+        .empty-msg { text-align: center; color: #adb5bd; padding: 40px 0; font-size: 16px; }
+        .stats { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 25px; padding-top: 20px; border-top: 2px dashed #e9ecef; }
+        .stat-card { background: #f8f9fa; padding: 12px 25px; border-radius: 12px; display: flex; align-items: center; gap: 12px; }
+        .stat-card .num { font-size: 24px; font-weight: 700; color: #1a5276; }
+        .stat-card .label { color: #6c757d; font-size: 14px; }
+        .stat-card .icon { font-size: 28px; }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #2c3e50; color: white; padding: 14px 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: none; z-index: 999; font-weight: 500; max-width: 90%; }
+        .toast.success { background: #27ae60; }
+        .toast.error { background: #e74c3c; }
+        .toast.info { background: #1a5276; }
+        .toast.show { display: block; animation: slideUp 0.4s ease; }
+        @keyframes slideUp { from { transform: translateX(-50%) translateY(30px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+        .loading-spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid #f3f3f3; border-top: 3px solid #1a5276; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @media (max-width: 600px) { body { padding: 10px; } .container { padding: 15px; } .form-row { grid-template-columns: 1fr; } .header h1 { font-size: 20px; } .stats { flex-direction: column; } .header { flex-direction: column; align-items: stretch; } .filter-section { flex-direction: column; } .table-toolbar { flex-direction: column; align-items: stretch; } .table-toolbar .toolbar-left { justify-content: center; } }
     </style>
 </head>
 <body>
 
-<div class="container-lg">
-    
-    <!-- العنوان -->
-    <div class="mb-4">
-        <h1 class="page-title">
-            <i class="fas fa-calendar-plus"></i> إدارة الإجازات الطويلة
-        </h1>
-        <p class="sub-title"><i class="fas fa-chevron-left"></i> أدخل بيانات الإجازة، اضغط "احسب" لحساب تاريخ المباشرة وإضافتها للقائمة</p>
+<div class="container">
+
+    <div class="header">
+        <h1>📋 نظام إدارة الإجازات <span>ديوان محافظة</span></h1>
+        <div style="font-size:14px;color:#666;"><span id="recordCountHeader">0</span> إجازة مسجلة</div>
     </div>
 
-    <!-- نموذج الإدخال -->
-    <div class="main-card">
-        <div class="row g-4">
-            <div class="col-md-3">
-                <label class="form-label"><i class="fas fa-user"></i> اسم المنتسب</label>
-                <input type="text" class="form-control" id="empName" placeholder="أدخل الاسم الكامل">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label"><i class="fas fa-calendar-alt"></i> تاريخ الإجازة</label>
-                <input type="date" class="form-control" id="startDate">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label"><i class="fas fa-clock"></i> عدد الأيام</label>
-                <input type="number" class="form-control" id="daysCount" placeholder="مثلاً 30" min="1">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label"><i class="fas fa-calendar-check"></i> تاريخ المباشرة</label>
-                <input type="text" class="form-control" id="returnDate" disabled placeholder="سيُحسب تلقائياً">
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
-                <button class="btn btn-calculate" id="calculateBtn">
-                    <i class="fas fa-calculator"></i> احسب وأضف
-                </button>
-            </div>
+    <div class="status-bar">
+        <div>
+            <span class="status-dot offline" id="statusDot"></span>
+            <span id="statusText">جاري التحميل...</span>
+            <span style="color:#999;font-size:12px;margin-right:10px;" id="lastSync"></span>
         </div>
+        <div style="font-size:13px;color:#666;"><span id="recordCount">0</span> إجازة مسجلة</div>
+    </div>
 
-        <!-- عرض تاريخ المباشرة بشكل منفصل -->
-        <div class="row mt-3">
-            <div class="col-12">
-                <div class="highlight-box d-flex justify-content-between align-items-center flex-wrap">
-                    <div>
-                        <span class="label"><i class="fas fa-arrow-left"></i> تاريخ المباشرة المحسوب:</span>
-                        <span class="value me-3" id="returnDisplay">لم يتم الحساب بعد</span>
-                    </div>
-                    <div>
-                        <span class="label"><i class="fas fa-info-circle"></i> سيتم إضافة الإجازة للجدول عند الضغط على احسب</span>
-                    </div>
+    <div class="form-section">
+        <h2>➕ إضافة إجازة جديدة</h2>
+        <div class="form-row">
+            <div class="form-group">
+                <label>👤 الاسم *</label>
+                <input type="text" id="employeeName" placeholder="أدخل اسم الموظف">
+            </div>
+            <div class="form-group">
+                <label>📅 تاريخ الاجازة *</label>
+                <div class="date-input-wrapper">
+                    <input type="text" id="leaveDate" placeholder="اختر التاريخ" readonly>
+                    <span class="date-icon">📅</span>
                 </div>
             </div>
+            <div class="form-group">
+                <label>🔢 عدد الأيام *</label>
+                <input type="number" id="daysCount" min="1" placeholder="مثال: 5">
+            </div>
+            <div class="form-group">
+                <label>📌 تاريخ المباشرة <span class="auto">(تلقائي)</span></label>
+                <input type="text" id="returnDate" readonly placeholder="سيُحسب تلقائياً">
+            </div>
+            <div class="form-group">
+                <label>📂 نوع الاجازة <span class="manual">(يدوي)</span></label>
+                <select id="leaveType">
+                    <option value="اعتيادي">اعتيادي</option>
+                    <option value="مرضية">مرضية</option>
+                    <option value="امومة">امومة</option>
+                    <option value="دراسية">دراسية</option>
+                    <option value="بدون راتب">بدون راتب</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>📝 ملاحظات <span class="manual">(يدوي)</span></label>
+                <textarea id="notes" rows="1" placeholder="أي ملاحظات إضافية..."></textarea>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button class="btn-add" onclick="addToDatabase()">➕ إضافة وحفظ في قاعدة البيانات</button>
         </div>
     </div>
 
-    <!-- الإحصائيات -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-3 col-6">
-            <div class="stat-box">
-                <div class="number" id="totalCount">0</div>
-                <div class="label">إجمالي الإجازات</div>
-            </div>
+    <div class="filter-section">
+        <div class="filter-group">
+            <label>📅 من تاريخ</label>
+            <input type="date" id="filterFrom" dir="ltr">
         </div>
-        <div class="col-md-3 col-6">
-            <div class="stat-box" style="border-bottom-color: #27ae60;">
-                <div class="number" id="activeCount">0</div>
-                <div class="label">جارية</div>
-            </div>
+        <div class="filter-group">
+            <label>📅 إلى تاريخ</label>
+            <input type="date" id="filterTo" dir="ltr">
         </div>
-        <div class="col-md-3 col-6">
-            <div class="stat-box" style="border-bottom-color: #f39c12;">
-                <div class="number" id="upcomingCount">0</div>
-                <div class="label">قادمة</div>
-            </div>
+        <div class="filter-group">
+            <label>📂 نوع الاجازة</label>
+            <select id="filterType">
+                <option value="الكل">الكل</option>
+                <option value="اعتيادي">اعتيادي</option>
+                <option value="مرضية">مرضية</option>
+                <option value="امومة">امومة</option>
+                <option value="دراسية">دراسية</option>
+                <option value="بدون راتب">بدون راتب</option>
+            </select>
         </div>
-        <div class="col-md-3 col-6">
-            <div class="stat-box" style="border-bottom-color: #e74c3c;">
-                <div class="number" id="endedCount">0</div>
-                <div class="label">منتهية</div>
-            </div>
-        </div>
+        <button class="btn-filter" onclick="applyFilters()">🔍 تطبيق الفلتر</button>
+        <button class="btn-clear" onclick="clearFilters()">🗑️ إلغاء الفلتر</button>
     </div>
 
-    <!-- جدول الإجازات -->
-    <div class="main-card">
-        <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
-            <h5 style="color: #1a237e; font-weight: 700;">
-                <i class="fas fa-list-ul" style="color: #3f51b5;"></i> قائمة الإجازات
-                <span class="badge bg-primary ms-2" id="recordCount">0</span>
-            </h5>
-            <div class="action-buttons">
-                <button class="btn btn-export" onclick="exportCSV()">
-                    <i class="fas fa-file-excel"></i> تصدير CSV
-                </button>
-                <button class="btn btn-delete-all" onclick="deleteAll()">
-                    <i class="fas fa-trash-alt"></i> مسح الكل
-                </button>
-            </div>
+    <div class="table-toolbar">
+        <div class="toolbar-left">
+            <button class="btn-refresh" onclick="refreshData()" id="refreshBtn">🔄 تحديث البيانات</button>
+            <button class="btn-word" onclick="exportToWord()">📄 حفظ كـ Word</button>
         </div>
-
-        <div class="table-container">
-            <table class="table" id="vacationTable">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>الاسم</th>
-                        <th>تاريخ الإجازة</th>
-                        <th>عدد الأيام</th>
-                        <th>تاريخ المباشرة</th>
-                        <th>الحالة</th>
-                        <th>إجراء</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <tr>
-                        <td colspan="7">
-                            <div class="empty-state">
-                                <i class="fas fa-umbrella-beach"></i>
-                                <h5>لا توجد إجازات مسجلة</h5>
-                                <p class="text-muted">أدخل البيانات واضغط "احسب وأضف"</p>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        <div class="toolbar-right"><span id="filterInfo">عرض جميع الإجازات</span></div>
     </div>
+
+    <div class="table-wrapper">
+        <table id="leaveTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>الاسم</th>
+                    <th>تاريخ الاجازة</th>
+                    <th>عدد الأيام</th>
+                    <th>📌 تاريخ المباشرة</th>
+                    <th>نوع الاجازة</th>
+                    <th>ملاحظات</th>
+                    <th>إجراء</th>
+                </tr>
+            </thead>
+            <tbody id="leaveTableBody">
+                <tr><td colspan="8" class="empty-msg">📭 جاري تحميل البيانات...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="stats">
+        <div class="stat-card"><span class="icon">📊</span><span class="num" id="totalCount">0</span><span class="label">إجمالي الإجازات</span></div>
+        <div class="stat-card"><span class="icon">📅</span><span class="num" id="totalDays">0</span><span class="label">إجمالي الأيام</span></div>
+        <div class="stat-card"><span class="icon">🔍</span><span class="num" id="filteredCount">0</span><span class="label">نتائج الفلترة</span></div>
+    </div>
+
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
-    // ===== المتغيرات =====
-    let vacations = [];
-    let counter = 1;
+    // ============================================
+    // 🔗 رابط الـ Web App
+    // ============================================
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwZtS5m_PDwlbq-lLFnmCRGlJ2cm5fc15UKC221gXsVGJFvZgntYe9mazV81Kdj17K9/exec';
 
-    // ===== عناصر DOM =====
-    const empName = document.getElementById('empName');
-    const startDate = document.getElementById('startDate');
-    const daysCount = document.getElementById('daysCount');
-    const returnDate = document.getElementById('returnDate');
-    const returnDisplay = document.getElementById('returnDisplay');
-    const calculateBtn = document.getElementById('calculateBtn');
-    const tableBody = document.getElementById('tableBody');
-    const recordCount = document.getElementById('recordCount');
+    let leaves = [];
+    let filteredLeaves = [];
+    let isLoading = false;
+    let isFiltered = false;
 
-    // ===== دالة حساب تاريخ المباشرة =====
-    function calculateReturnDate() {
-        const start = startDate.value;
-        const days = parseInt(daysCount.value);
-
-        if (!start || !days || days < 1) {
-            returnDate.value = '';
-            returnDisplay.textContent = 'يرجى إدخال تاريخ وعدد أيام صحيح';
-            returnDisplay.style.color = '#e74c3c';
-            return null;
-        }
-
-        const startObj = new Date(start);
-        const returnObj = new Date(startObj);
-        returnObj.setDate(returnObj.getDate() + days);
-
-        const day = String(returnObj.getDate()).padStart(2, '0');
-        const month = String(returnObj.getMonth() + 1).padStart(2, '0');
-        const year = returnObj.getFullYear();
-        const formatted = `${day}/${month}/${year}`;
-
-        returnDate.value = formatted;
-        returnDisplay.textContent = formatted;
-        returnDisplay.style.color = '#1a237e';
-
-        return returnObj;
-    }
-
-    // ===== دالة تحديد الحالة =====
-    function getStatus(startDateStr, returnDateStr) {
-        const today = new Date();
-        today.setHours(0,0,0,0);
-        const start = new Date(startDateStr);
-        start.setHours(0,0,0,0);
-        
-        // تحويل تاريخ المباشرة من نص (dd/mm/yyyy) إلى Date
-        const parts = returnDateStr.split('/');
-        const end = new Date(parts[2], parts[1] - 1, parts[0]);
-        end.setHours(0,0,0,0);
-
-        if (end < today) return { text: 'منتهية', class: 'badge bg-danger text-white' };
-        if (start <= today && end >= today) return { text: 'جارية', class: 'badge bg-success text-white' };
-        return { text: 'قادمة', class: 'badge bg-warning text-dark' };
-    }
-
-    // ===== إضافة إجازة =====
-    function addVacation() {
-        const name = empName.value.trim();
-        const start = startDate.value;
-        const days = parseInt(daysCount.value);
-
-        if (!name) { alert('يرجى إدخال اسم المنتسب'); return; }
-        if (!start) { alert('يرجى اختيار تاريخ الإجازة'); return; }
-        if (!days || days < 1) { alert('يرجى إدخال عدد أيام صحيح'); return; }
-
-        const returnObj = calculateReturnDate();
-        if (!returnObj) return;
-
-        const returnFormatted = returnDate.value;
-        const status = getStatus(start, returnFormatted);
-
-        const vacation = {
-            id: counter++,
-            name: name,
-            startDate: start,
-            days: days,
-            returnDate: returnFormatted,
-            statusText: status.text,
-            statusClass: status.class
-        };
-
-        vacations.push(vacation);
-        renderTable();
-        updateStats();
-
-        // تنظيف الحقول
-        startDate.value = '';
-        daysCount.value = '';
-        returnDate.value = '';
-        returnDisplay.textContent = 'تمت الإضافة بنجاح ✅';
-        returnDisplay.style.color = '#27ae60';
-        empName.focus();
-        empName.select();
-
-        showToast('تم إضافة الإجازة بنجاح!');
-    }
-
-    // ===== حذف إجازة مفردة =====
-    function deleteVacation(id) {
-        const vacation = vacations.find(v => v.id === id);
-        if (!vacation) return;
-        
-        if (confirm(`هل أنت متأكد من حذف إجازة "${vacation.name}"؟`)) {
-            vacations = vacations.filter(v => v.id !== id);
-            renderTable();
-            updateStats();
-            showToast(`تم حذف إجازة "${vacation.name}"`);
-        }
-    }
-
-    // ===== حذف جميع الإجازات =====
-    function deleteAll() {
-        if (vacations.length === 0) {
-            showToast('لا توجد إجازات لحذفها');
-            return;
-        }
-        
-        if (confirm(`هل أنت متأكد من حذف جميع الإجازات (${vacations.length} إجازة)؟`)) {
-            vacations = [];
-            counter = 1;
-            renderTable();
-            updateStats();
-            showToast('تم حذف جميع الإجازات');
-        }
-    }
-
-    // ===== عرض الجدول =====
-    function renderTable() {
-        if (vacations.length === 0) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="7">
-                        <div class="empty-state">
-                            <i class="fas fa-umbrella-beach"></i>
-                            <h5>لا توجد إجازات مسجلة</h5>
-                            <p class="text-muted">أدخل البيانات واضغط "احسب وأضف"</p>
-                        </div>
-                    </td>
-                </tr>
-            `;
-            recordCount.textContent = '0';
-            return;
-        }
-
-        const sorted = [...vacations].sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
-
-        tableBody.innerHTML = sorted.map((v, index) => `
-            <tr>
-                <td><strong>${index + 1}</strong></td>
-                <td><strong>${v.name}</strong></td>
-                <td>${formatDate(v.startDate)}</td>
-                <td><span class="badge-days">${v.days} يوم</span></td>
-                <td><span class="badge-return">${v.returnDate}</span></td>
-                <td><span class="${v.statusClass}" style="padding: 6px 16px; border-radius: 20px;">${v.statusText}</span></td>
-                <td>
-                    <button class="btn btn-delete-single" onclick="deleteVacation(${v.id})" title="حذف هذه الإجازة">
-                        <i class="fas fa-trash-alt"></i> حذف
-                    </button>
-                </td>
-            </tr>
-        `).join('');
-
-        recordCount.textContent = vacations.length;
-    }
-
-    // ===== تحديث الإحصائيات =====
-    function updateStats() {
-        const today = new Date();
-        today.setHours(0,0,0,0);
-
-        let active = 0, upcoming = 0, ended = 0;
-
-        vacations.forEach(v => {
-            const start = new Date(v.startDate);
-            start.setHours(0,0,0,0);
-            const parts = v.returnDate.split('/');
-            const end = new Date(parts[2], parts[1] - 1, parts[0]);
-            end.setHours(0,0,0,0);
-
-            if (end < today) ended++;
-            else if (start <= today && end >= today) active++;
-            else upcoming++;
-        });
-
-        document.getElementById('totalCount').textContent = vacations.length;
-        document.getElementById('activeCount').textContent = active;
-        document.getElementById('upcomingCount').textContent = upcoming;
-        document.getElementById('endedCount').textContent = ended;
-    }
-
-    // ===== تصدير CSV =====
-    function exportCSV() {
-        if (vacations.length === 0) {
-            alert('لا توجد بيانات للتصدير.');
-            return;
-        }
-
-        const headers = ['الاسم', 'تاريخ الإجازة', 'عدد الأيام', 'تاريخ المباشرة', 'الحالة'];
-        let csv = '\uFEFF';
-        csv += headers.join(',') + '\n';
-        vacations.forEach(v => {
-            csv += `${v.name},${formatDate(v.startDate)},${v.days},${v.returnDate},${v.statusText}\n`;
-        });
-
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `الإجازات_${new Date().toISOString().split('T')[0]}.csv`;
-        link.click();
-        URL.revokeObjectURL(link.href);
-    }
-
-    // ===== أدوات مساعدة =====
-    function formatDate(dateStr) {
-        if (!dateStr) return '';
-        const d = new Date(dateStr);
-        const day = String(d.getDate()).padStart(2, '0');
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const year = d.getFullYear();
-        return `${day}/${month}/${year}`;
-    }
-
-    function showToast(message) {
-        const toast = document.createElement('div');
-        toast.style.cssText = `
-            position: fixed;
-            bottom: 25px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1a237e;
-            color: white;
-            padding: 14px 35px;
-            border-radius: 12px;
-            font-weight: 700;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-            z-index: 9999;
-            opacity: 0;
-            transition: opacity 0.4s;
-            font-size: 15px;
-            text-align: center;
-            max-width: 90%;
-        `;
+    // ============================================
+    // 📢 دوال الإشعارات والحالة
+    // ============================================
+    function showToast(message, type = 'info') {
+        const toast = document.getElementById('toast');
         toast.textContent = message;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.style.opacity = '1', 50);
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            setTimeout(() => toast.remove(), 400);
-        }, 2500);
+        toast.className = 'toast ' + type + ' show';
+        clearTimeout(toast.timeout);
+        toast.timeout = setTimeout(() => toast.classList.remove('show'), 3500);
     }
 
-    // ===== ربط الأحداث =====
-    calculateBtn.addEventListener('click', addVacation);
+    function setStatus(state, message = '') {
+        const dot = document.getElementById('statusDot');
+        const text = document.getElementById('statusText');
+        dot.className = 'status-dot ' + state;
+        const stateMap = { 'online': '🟢 متصل بقاعدة البيانات', 'offline': '🔴 غير متصل', 'loading': '🔄 جاري التحميل...' };
+        text.textContent = stateMap[state] || state;
+        if (message) document.getElementById('lastSync').textContent = message;
+    }
 
-    startDate.addEventListener('change', calculateReturnDate);
-    daysCount.addEventListener('input', calculateReturnDate);
+    // ============================================
+    // 📅 دوال معالجة التاريخ (محسنة)
+    // ============================================
 
-    document.querySelectorAll('#empName, #startDate, #daysCount').forEach(input => {
-        input.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                addVacation();
+    // ===== دالة تنظيف التاريخ من أي طابع زمني =====
+    function cleanDate(dateStr) {
+        if (!dateStr) return '';
+        
+        if (dateStr.includes('T')) dateStr = dateStr.split('T')[0];
+        if (dateStr.includes(' ')) dateStr = dateStr.split(' ')[0];
+        
+        if (dateStr.includes('-')) {
+            const parts = dateStr.split('-');
+            if (parts.length === 3) {
+                return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            }
+        }
+        
+        if (dateStr.includes('/')) {
+            const parts = dateStr.split('/');
+            if (parts.length === 3 && parts[0].length === 4) {
+                return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            }
+        }
+        
+        return dateStr;
+    }
+
+    // ===== دالة إضافة أيام إلى تاريخ =====
+    function addDaysToDate(dateStr, daysToAdd) {
+        if (!dateStr || !daysToAdd) return '';
+        
+        const cleaned = cleanDate(dateStr);
+        const parts = cleaned.split('/');
+        
+        if (parts.length !== 3) return '';
+        
+        let day = parseInt(parts[0]);
+        let month = parseInt(parts[1]);
+        let year = parseInt(parts[2]);
+        
+        day += daysToAdd;
+        
+        const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        
+        function isLeapYear(y) {
+            return (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
+        }
+        
+        while (day > daysInMonth[month - 1] + (month === 2 && isLeapYear(year) ? 1 : 0)) {
+            const maxDay = daysInMonth[month - 1] + (month === 2 && isLeapYear(year) ? 1 : 0);
+            day -= maxDay;
+            month++;
+            if (month > 12) {
+                month = 1;
+                year++;
+            }
+        }
+        
+        return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${String(year)}`;
+    }
+
+    // ===== دالة تنسيق التاريخ للعرض (مع إضافة 1 للتعويض عن فقدان اليوم) =====
+    function formatDateForDisplay(dateStr) {
+        if (!dateStr) return '—';
+        
+        var day, month, year;
+        var originalDate = dateStr;
+        
+        // تنظيف التاريخ
+        var cleaned = dateStr;
+        if (cleaned.includes('T')) cleaned = cleaned.split('T')[0];
+        if (cleaned.includes(' ')) cleaned = cleaned.split(' ')[0];
+        
+        // التعرف على الصيغة
+        if (cleaned.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            var parts = cleaned.split('-');
+            year = parseInt(parts[0]);
+            month = parseInt(parts[1]);
+            day = parseInt(parts[2]);
+        }
+        else if (cleaned.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+            var parts = cleaned.split('/');
+            day = parseInt(parts[0]);
+            month = parseInt(parts[1]);
+            year = parseInt(parts[2]);
+        }
+        else {
+            return cleaned;
+        }
+        
+        // ✅ إضافة 1 إلى اليوم للتعويض عن فقدان اليوم
+        day = day + 1;
+        
+        // التعامل مع نهاية الشهر
+        var daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        function isLeapYear(y) {
+            return (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
+        }
+        if (month === 2 && isLeapYear(year)) {
+            daysInMonth[1] = 29;
+        }
+        
+        if (day > daysInMonth[month - 1]) {
+            day = 1;
+            month++;
+            if (month > 12) {
+                month = 1;
+                year++;
+            }
+        }
+        
+        // تنسيق النتيجة
+        var resultDay = String(day).padStart(2, '0');
+        var resultMonth = String(month).padStart(2, '0');
+        var resultYear = String(year);
+        
+        return resultDay + '/' + resultMonth + '/' + resultYear;
+    }
+
+    // ===== دالة تحويل التاريخ من DD/MM/YYYY إلى YYYY-MM-DD =====
+    function convertToStorageFormat(dateStr) {
+        if (!dateStr) return '';
+        
+        if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) return dateStr;
+        
+        if (dateStr.includes('T')) dateStr = dateStr.split('T')[0];
+        if (dateStr.includes(' ')) dateStr = dateStr.split(' ')[0];
+        
+        const parts = dateStr.split('/');
+        if (parts.length === 3) {
+            const day = parseInt(parts[0]);
+            const month = parseInt(parts[1]);
+            const year = parseInt(parts[2]);
+            
+            if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+                return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            }
+        }
+        
+        return dateStr;
+    }
+
+    // ===== دالة للتحقق من صحة التاريخ =====
+    function isValidDate(dateStr) {
+        if (!dateStr) return false;
+        const cleaned = cleanDate(dateStr);
+        const parts = cleaned.split('/');
+        if (parts.length !== 3) return false;
+        
+        const day = parseInt(parts[0]);
+        const month = parseInt(parts[1]);
+        const year = parseInt(parts[2]);
+        
+        if (isNaN(day) || isNaN(month) || isNaN(year)) return false;
+        if (month < 1 || month > 12) return false;
+        if (day < 1 || day > 31) return false;
+        
+        const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        const maxDay = daysInMonth[month - 1] + (month === 2 && ((year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)) ? 1 : 0);
+        return day <= maxDay;
+    }
+
+    // ============================================
+    // 🏷️ دوال المساعدة
+    // ============================================
+    function getTypeClass(type) {
+        const map = {
+            'اعتيادي': 'seniority',
+            'مرضية': 'sick',
+            'امومة': 'maternity',
+            'دراسية': 'study',
+            'بدون راتب': 'unpaid'
+        };
+        return map[type] || 'default';
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // ============================================
+    // 📊 حساب تاريخ المباشرة
+    // ============================================
+    function calculateReturnDate() {
+        const leaveDate = document.getElementById('leaveDate').value;
+        const days = parseInt(document.getElementById('daysCount').value) || 0;
+        const returnInput = document.getElementById('returnDate');
+
+        if (leaveDate && days > 0) {
+            returnInput.value = addDaysToDate(leaveDate, days);
+        } else {
+            returnInput.value = '';
+        }
+    }
+
+    // ============================================
+    // 📅 إعداد التقويم
+    // ============================================
+    $(document).ready(function() {
+        $('#leaveDate').datepicker({
+            changeMonth: true,
+            changeYear: true,
+            yearRange: '2020:2030',
+            dateFormat: 'dd/mm/yy',
+            showButtonPanel: true,
+            onSelect: function(dateText) {
+                const cleaned = cleanDate(dateText);
+                $(this).val(cleaned);
+                calculateReturnDate();
             }
         });
+
+        $.datepicker.regional['ar'] = {
+            closeText: 'إغلاق',
+            prevText: '&#x3C;السابق',
+            nextText: 'التالي&#x3E;',
+            currentText: 'اليوم',
+            monthNames: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+                'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
+            monthNamesShort: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+                'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
+            dayNames: ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'],
+            dayNamesShort: ['أحد', 'إثن', 'ثلاث', 'أربع', 'خميس', 'جمعة', 'سبت'],
+            dayNamesMin: ['أحد', 'إثن', 'ثلاث', 'أربع', 'خميس', 'جمعة', 'سبت'],
+            weekHeader: 'أسبوع',
+            dateFormat: 'dd/mm/yy',
+            firstDay: 0,
+            isRTL: true,
+            showMonthAfterYear: false,
+            yearSuffix: ''
+        };
+        $.datepicker.setDefaults($.datepicker.regional['ar']);
     });
 
-    // ===== تحميل أولي =====
-    renderTable();
-    updateStats();
+    document.getElementById('daysCount').addEventListener('input', calculateReturnDate);
+
+    // ============================================
+    // 📋 عرض الجدول
+    // ============================================
+    function renderTable(data) {
+        const tbody = document.getElementById('leaveTableBody');
+        const displayData = data || (isFiltered ? filteredLeaves : leaves);
+
+        if (displayData.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" class="empty-msg">📭 لا توجد إجازات مسجلة</td></tr>`;
+        } else {
+            tbody.innerHTML = displayData.map((leave, index) => {
+                const typeClass = getTypeClass(leave.type);
+                return `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><strong>${escapeHtml(leave.name)}</strong></td>
+                        <td>${formatDateForDisplay(leave.leaveDate)}</td>
+                        <td><span style="font-weight:700;color:#1a5276;">${leave.days}</span></td>
+                        <td style="color:#27ae60;font-weight:600;">${formatDateForDisplay(leave.returnDate)}</td>
+                        <td><span class="badge-type ${typeClass}">${escapeHtml(leave.type)}</span></td>
+                        <td style="max-width:120px;font-size:12px;color:#6c757d;">${escapeHtml(leave.notes || '—')}</td>
+                        <td><button class="btn-delete" onclick="deleteFromDatabase(${leave.id})">🗑️ حذف</button></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        document.getElementById('totalCount').textContent = leaves.length;
+        document.getElementById('recordCount').textContent = leaves.length;
+        document.getElementById('recordCountHeader').textContent = leaves.length;
+        document.getElementById('filteredCount').textContent = displayData.length;
+        const totalDays = leaves.reduce((sum, l) => sum + (parseInt(l.days) || 0), 0);
+        document.getElementById('totalDays').textContent = totalDays;
+    }
+
+    // ============================================
+    // 🔍 دوال الفلترة
+    // ============================================
+    function applyFilters() {
+        const fromDate = document.getElementById('filterFrom').value;
+        const toDate = document.getElementById('filterTo').value;
+        const type = document.getElementById('filterType').value;
+
+        filteredLeaves = leaves.filter(leave => {
+            let match = true;
+            if (fromDate && leave.leaveDate < fromDate) match = false;
+            if (toDate && leave.leaveDate > toDate) match = false;
+            if (type !== 'الكل' && leave.type !== type) match = false;
+            return match;
+        });
+
+        isFiltered = true;
+        renderTable(filteredLeaves);
+        document.getElementById('filterInfo').textContent = `عرض ${filteredLeaves.length} نتيجة من ${leaves.length}`;
+        showToast(`🔍 تم عرض ${filteredLeaves.length} نتيجة`, 'info');
+    }
+
+    function clearFilters() {
+        document.getElementById('filterFrom').value = '';
+        document.getElementById('filterTo').value = '';
+        document.getElementById('filterType').value = 'الكل';
+        isFiltered = false;
+        renderTable(leaves);
+        document.getElementById('filterInfo').textContent = 'عرض جميع الإجازات';
+        showToast('🗑️ تم إلغاء الفلتر', 'info');
+    }
+
+    document.getElementById('filterType').addEventListener('change', function() {
+        if (this.value !== 'الكل') applyFilters();
+        else clearFilters();
+    });
+
+    // ============================================
+    // 🌐 الاتصال بقاعدة البيانات
+    // ============================================
+    async function makeRequest(action, data) {
+        try {
+            const params = new URLSearchParams();
+            params.append('action', action);
+            if (data) params.append('data', JSON.stringify(data));
+            const url = API_URL + '?' + params.toString();
+            
+            console.log('📤 إرسال طلب:', action, data);
+            
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+            
+            const text = await response.text();
+            console.log('📥 استجابة:', text);
+            
+            try { 
+                return JSON.parse(text); 
+            } catch (e) { 
+                return { success: false, message: 'خطأ في تحليل البيانات: ' + text.substring(0, 100) }; 
+            }
+        } catch (error) {
+            console.error('❌ خطأ في الاتصال:', error);
+            return { success: false, message: 'خطأ في الاتصال: ' + error.message };
+        }
+    }
+
+    // ============================================
+    // ➕ إضافة إلى قاعدة البيانات
+    // ============================================
+    async function addToDatabase() {
+        const name = document.getElementById('employeeName').value.trim();
+        const leaveDateRaw = document.getElementById('leaveDate').value;
+        const days = parseInt(document.getElementById('daysCount').value);
+        const returnDateRaw = document.getElementById('returnDate').value;
+        const type = document.getElementById('leaveType').value;
+        const notes = document.getElementById('notes').value.trim();
+
+        if (!name) { showToast('⚠️ الرجاء إدخال اسم الموظف', 'error'); return; }
+        if (!leaveDateRaw) { showToast('⚠️ الرجاء اختيار تاريخ الاجازة', 'error'); return; }
+        if (!days || days < 1) { showToast('⚠️ الرجاء إدخال عدد أيام صحيح', 'error'); return; }
+        if (!returnDateRaw) { showToast('⚠️ تاريخ المباشرة غير صحيح', 'error'); return; }
+
+        const leaveDateCleaned = cleanDate(leaveDateRaw);
+        const returnDateCleaned = cleanDate(returnDateRaw);
+        
+        if (!isValidDate(leaveDateCleaned)) { showToast('⚠️ تاريخ الاجازة غير صحيح', 'error'); return; }
+        if (!isValidDate(returnDateCleaned)) { showToast('⚠️ تاريخ المباشرة غير صحيح', 'error'); return; }
+        
+        const leaveDateStorage = convertToStorageFormat(leaveDateCleaned);
+        const returnDateStorage = convertToStorageFormat(returnDateCleaned);
+
+        const btn = document.querySelector('.btn-add');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading-spinner"></span> جاري الحفظ...';
+
+        try {
+            const result = await makeRequest('addLeave', {
+                name, leaveDate: leaveDateStorage, days, returnDate: returnDateStorage, type, notes
+            });
+
+            if (result.success) {
+                showToast('✅ تمت إضافة الإجازة بنجاح', 'success');
+                await loadFromDatabase();
+                document.getElementById('employeeName').value = '';
+                document.getElementById('leaveDate').value = '';
+                document.getElementById('daysCount').value = '';
+                document.getElementById('returnDate').value = '';
+                document.getElementById('notes').value = '';
+                if (isFiltered) clearFilters();
+            } else {
+                showToast('❌ ' + (result.message || 'فشل الحفظ'), 'error');
+            }
+        } catch (error) {
+            showToast('❌ خطأ في الاتصال', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '➕ إضافة وحفظ في قاعدة البيانات';
+        }
+    }
+
+    // ============================================
+    // 📥 تحميل من قاعدة البيانات
+    // ============================================
+    async function loadFromDatabase() {
+        if (isLoading) return;
+        isLoading = true;
+        setStatus('loading');
+
+        try {
+            const result = await makeRequest('getAllLeaves', null);
+            if (result.success && result.data) {
+                leaves = result.data;
+                if (isFiltered) applyFilters();
+                else renderTable(leaves);
+                setStatus('online', 'آخر تحديث: ' + new Date().toLocaleTimeString('ar-EG'));
+            } else {
+                leaves = [];
+                renderTable(leaves);
+                setStatus('offline');
+                showToast('❌ فشل تحميل البيانات', 'error');
+            }
+        } catch (error) {
+            setStatus('offline');
+            showToast('❌ خطأ في الاتصال', 'error');
+        } finally {
+            isLoading = false;
+        }
+    }
+
+    // ============================================
+    // 🔄 تحديث البيانات
+    // ============================================
+    async function refreshData() {
+        const btn = document.getElementById('refreshBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading-spinner"></span> جاري التحديث...';
+        await loadFromDatabase();
+        btn.disabled = false;
+        btn.innerHTML = '🔄 تحديث البيانات';
+        showToast('✅ تم تحديث البيانات بنجاح', 'success');
+    }
+
+    // ============================================
+    // 🗑️ حذف من قاعدة البيانات
+    // ============================================
+    async function deleteFromDatabase(id) {
+        if (!confirm('⚠️ هل أنت متأكد من حذف هذه الإجازة؟')) return;
+        const btn = event && event.target ? event.target : document.querySelector(`button[onclick*="deleteFromDatabase(${id})"]`);
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = '⏳ جاري...';
+        }
+
+        try {
+            const result = await makeRequest('deleteLeave', { id });
+            if (result.success) {
+                showToast('✅ تم حذف الإجازة بنجاح', 'success');
+                await loadFromDatabase();
+                if (isFiltered) applyFilters();
+            } else {
+                showToast('❌ ' + (result.message || 'فشل الحذف'), 'error');
+            }
+        } catch (error) {
+            showToast('❌ خطأ في الاتصال', 'error');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = '🗑️ حذف';
+            }
+        }
+    }
+
+    // ============================================
+    // 📄 تصدير إلى Word
+    // ============================================
+    function exportToWord() {
+        const data = isFiltered ? filteredLeaves : leaves;
+        if (data.length === 0) {
+            showToast('⚠️ لا توجد بيانات للتصدير', 'error');
+            return;
+        }
+
+        let html = `
+            <html xmlns:o='urn:schemas-microsoft-com:office:office'
+                  xmlns:w='urn:schemas-microsoft-com:office:word'
+                  xmlns='http://www.w3.org/TR/REC-html40'>
+            <head><meta charset="utf-8"><title>تقرير الإجازات</title>
+            <style>
+                body { font-family: Arial, sans-serif; direction: rtl; padding: 20px; }
+                h1 { color: #1a5276; text-align: center; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                th { background-color: #1a5276; color: white; padding: 10px; border: 1px solid #ddd; }
+                td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+                tr:nth-child(even) { background-color: #f9f9f9; }
+                .footer { margin-top: 30px; text-align: center; color: #666; font-size: 12px; }
+            </style>
+            </head>
+            <body>
+                <h1>📋 تقرير الإجازات - ديوان محافظة</h1>
+                <p style="text-align:center;color:#666;">تم التصدير في: ${new Date().toLocaleString('ar-EG')}</p>
+                <table><thead><tr><th>#</th><th>الاسم</th><th>تاريخ الاجازة</th><th>عدد الأيام</th><th>تاريخ المباشرة</th><th>نوع الاجازة</th><th>ملاحظات</th></tr></thead><tbody>
+        `;
+
+        data.forEach((leave, index) => {
+            html += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${escapeHtml(leave.name)}</td>
+                    <td>${formatDateForDisplay(leave.leaveDate)}</td>
+                    <td>${leave.days}</td>
+                    <td>${formatDateForDisplay(leave.returnDate)}</td>
+                    <td>${escapeHtml(leave.type)}</td>
+                    <td>${escapeHtml(leave.notes || '—')}</td>
+                </tr>
+            `;
+        });
+
+        const totalDays = data.reduce((sum, l) => sum + (parseInt(l.days) || 0), 0);
+        html += `
+                </tbody></table>
+                <div class="footer"><p>إجمالي عدد الإجازات: ${data.length} | إجمالي الأيام: ${totalDays}</p>
+                <p>تم إنشاء هذا التقرير بواسطة نظام إدارة الإجازات - ديوان محافظة</p></div>
+            </body></html>
+        `;
+
+        try {
+            const blob = new Blob(['\uFEFF' + html], { type: 'application/msword;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `تقرير_الإجازات_${new Date().toISOString().slice(0,10)}.doc`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+            showToast('✅ تم حفظ التقرير بصيغة Word بنجاح', 'success');
+        } catch (error) {
+            showToast('❌ خطأ في تصدير التقرير', 'error');
+        }
+    }
+
+    // ============================================
+    // 🔌 اختبار الاتصال
+    // ============================================
+    async function testConnection() {
+        try {
+            const result = await makeRequest('testConnection', null);
+            if (result.success) { setStatus('online', '✅ متصل'); return true; }
+            else { setStatus('offline'); return false; }
+        } catch { setStatus('offline'); return false; }
+    }
+
+    // ============================================
+    // 🚀 تحميل الصفحة
+    // ============================================
+    window.onload = async function() {
+        console.log('📋 نظام إدارة الإجازات - ديوان محافظة');
+        console.log('🔗 API URL:', API_URL);
+        const connected = await testConnection();
+        if (connected) {
+            await loadFromDatabase();
+        } else {
+            document.getElementById('leaveTableBody').innerHTML = `
+                <tr><td colspan="8" class="empty-msg">❌ لا يمكن الاتصال بقاعدة البيانات</td></tr>
+            `;
+            showToast('❌ لا يمكن الاتصال بقاعدة البيانات', 'error');
+        }
+    };
 </script>
 
 </body>
