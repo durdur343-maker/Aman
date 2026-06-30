@@ -89,29 +89,45 @@
         .btn-calculate i {
             margin-left: 10px;
         }
-        .btn-danger-custom {
+        .btn-delete-single {
             background: linear-gradient(135deg, #e74c3c, #c0392b);
             border: none;
             border-radius: 10px;
-            padding: 6px 14px;
+            padding: 7px 16px;
             color: white;
             font-weight: 600;
             transition: 0.3s;
+            font-size: 13px;
         }
-        .btn-danger-custom:hover {
+        .btn-delete-single:hover {
             transform: scale(1.1);
             color: white;
         }
-        .btn-success-custom {
+        .btn-delete-all {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            border: none;
+            border-radius: 10px;
+            padding: 8px 22px;
+            color: white;
+            font-weight: 700;
+            transition: 0.3s;
+            font-size: 14px;
+        }
+        .btn-delete-all:hover {
+            transform: scale(1.05);
+            color: white;
+        }
+        .btn-export {
             background: linear-gradient(135deg, #27ae60, #1e8449);
             border: none;
             border-radius: 10px;
-            padding: 8px 20px;
+            padding: 8px 22px;
             color: white;
-            font-weight: 600;
+            font-weight: 700;
             transition: 0.3s;
+            font-size: 14px;
         }
-        .btn-success-custom:hover {
+        .btn-export:hover {
             transform: scale(1.05);
             color: white;
         }
@@ -208,6 +224,12 @@
             font-weight: 800;
             color: #283593;
         }
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
         @media (max-width: 768px) {
             .main-card {
                 padding: 18px;
@@ -217,6 +239,10 @@
             }
             .page-title {
                 font-size: 22px;
+            }
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
             }
         }
     </style>
@@ -259,7 +285,7 @@
             </div>
         </div>
 
-        <!-- عرض تاريخ المباشرة بشكل منفصل (اختياري) -->
+        <!-- عرض تاريخ المباشرة بشكل منفصل -->
         <div class="row mt-3">
             <div class="col-12">
                 <div class="highlight-box d-flex justify-content-between align-items-center flex-wrap">
@@ -308,12 +334,13 @@
         <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
             <h5 style="color: #1a237e; font-weight: 700;">
                 <i class="fas fa-list-ul" style="color: #3f51b5;"></i> قائمة الإجازات
+                <span class="badge bg-primary ms-2" id="recordCount">0</span>
             </h5>
-            <div>
-                <button class="btn btn-success-custom" onclick="exportCSV()">
+            <div class="action-buttons">
+                <button class="btn btn-export" onclick="exportCSV()">
                     <i class="fas fa-file-excel"></i> تصدير CSV
                 </button>
-                <button class="btn btn-danger-custom" onclick="clearAll()">
+                <button class="btn btn-delete-all" onclick="deleteAll()">
                     <i class="fas fa-trash-alt"></i> مسح الكل
                 </button>
             </div>
@@ -361,6 +388,7 @@
     const returnDisplay = document.getElementById('returnDisplay');
     const calculateBtn = document.getElementById('calculateBtn');
     const tableBody = document.getElementById('tableBody');
+    const recordCount = document.getElementById('recordCount');
 
     // ===== دالة حساب تاريخ المباشرة =====
     function calculateReturnDate() {
@@ -378,7 +406,6 @@
         const returnObj = new Date(startObj);
         returnObj.setDate(returnObj.getDate() + days);
 
-        // تنسيق التاريخ
         const day = String(returnObj.getDate()).padStart(2, '0');
         const month = String(returnObj.getMonth() + 1).padStart(2, '0');
         const year = returnObj.getFullYear();
@@ -397,7 +424,10 @@
         today.setHours(0,0,0,0);
         const start = new Date(startDateStr);
         start.setHours(0,0,0,0);
-        const end = new Date(returnDateStr);
+        
+        // تحويل تاريخ المباشرة من نص (dd/mm/yyyy) إلى Date
+        const parts = returnDateStr.split('/');
+        const end = new Date(parts[2], parts[1] - 1, parts[0]);
         end.setHours(0,0,0,0);
 
         if (end < today) return { text: 'منتهية', class: 'badge bg-danger text-white' };
@@ -411,21 +441,16 @@
         const start = startDate.value;
         const days = parseInt(daysCount.value);
 
-        // التحقق من صحة البيانات
         if (!name) { alert('يرجى إدخال اسم المنتسب'); return; }
         if (!start) { alert('يرجى اختيار تاريخ الإجازة'); return; }
         if (!days || days < 1) { alert('يرجى إدخال عدد أيام صحيح'); return; }
 
-        // حساب تاريخ المباشرة
         const returnObj = calculateReturnDate();
         if (!returnObj) return;
 
         const returnFormatted = returnDate.value;
+        const status = getStatus(start, returnFormatted);
 
-        // تحديد الحالة
-        const status = getStatus(start, returnObj.toISOString().split('T')[0]);
-
-        // إنشاء كائن الإجازة
         const vacation = {
             id: counter++,
             name: name,
@@ -436,14 +461,11 @@
             statusClass: status.class
         };
 
-        // إضافة للقائمة
         vacations.push(vacation);
-
-        // تحديث الجدول والإحصائيات
         renderTable();
         updateStats();
 
-        // تنظيف الحقول (نحتفظ بالاسم فقط لسهولة الإضافة المتتالية)
+        // تنظيف الحقول
         startDate.value = '';
         daysCount.value = '';
         returnDate.value = '';
@@ -452,8 +474,36 @@
         empName.focus();
         empName.select();
 
-        // رسالة نجاح
         showToast('تم إضافة الإجازة بنجاح!');
+    }
+
+    // ===== حذف إجازة مفردة =====
+    function deleteVacation(id) {
+        const vacation = vacations.find(v => v.id === id);
+        if (!vacation) return;
+        
+        if (confirm(`هل أنت متأكد من حذف إجازة "${vacation.name}"؟`)) {
+            vacations = vacations.filter(v => v.id !== id);
+            renderTable();
+            updateStats();
+            showToast(`تم حذف إجازة "${vacation.name}"`);
+        }
+    }
+
+    // ===== حذف جميع الإجازات =====
+    function deleteAll() {
+        if (vacations.length === 0) {
+            showToast('لا توجد إجازات لحذفها');
+            return;
+        }
+        
+        if (confirm(`هل أنت متأكد من حذف جميع الإجازات (${vacations.length} إجازة)؟`)) {
+            vacations = [];
+            counter = 1;
+            renderTable();
+            updateStats();
+            showToast('تم حذف جميع الإجازات');
+        }
     }
 
     // ===== عرض الجدول =====
@@ -470,10 +520,10 @@
                     </td>
                 </tr>
             `;
+            recordCount.textContent = '0';
             return;
         }
 
-        // ترتيب تنازلي حسب تاريخ البدء
         const sorted = [...vacations].sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
 
         tableBody.innerHTML = sorted.map((v, index) => `
@@ -485,34 +535,14 @@
                 <td><span class="badge-return">${v.returnDate}</span></td>
                 <td><span class="${v.statusClass}" style="padding: 6px 16px; border-radius: 20px;">${v.statusText}</span></td>
                 <td>
-                    <button class="btn btn-danger-custom" onclick="deleteVacation(${v.id})">
-                        <i class="fas fa-trash"></i>
+                    <button class="btn btn-delete-single" onclick="deleteVacation(${v.id})" title="حذف هذه الإجازة">
+                        <i class="fas fa-trash-alt"></i> حذف
                     </button>
                 </td>
             </tr>
         `).join('');
-    }
 
-    // ===== حذف إجازة =====
-    function deleteVacation(id) {
-        if (confirm('هل أنت متأكد من حذف هذه الإجازة؟')) {
-            vacations = vacations.filter(v => v.id !== id);
-            renderTable();
-            updateStats();
-            showToast('تم حذف الإجازة.');
-        }
-    }
-
-    // ===== مسح الكل =====
-    function clearAll() {
-        if (vacations.length === 0) return;
-        if (confirm('هل أنت متأكد من مسح جميع الإجازات؟')) {
-            vacations = [];
-            counter = 1;
-            renderTable();
-            updateStats();
-            showToast('تم مسح جميع الإجازات.');
-        }
+        recordCount.textContent = vacations.length;
     }
 
     // ===== تحديث الإحصائيات =====
@@ -525,7 +555,6 @@
         vacations.forEach(v => {
             const start = new Date(v.startDate);
             start.setHours(0,0,0,0);
-            // نحتاج تاريخ المباشرة من النص المحفوظ
             const parts = v.returnDate.split('/');
             const end = new Date(parts[2], parts[1] - 1, parts[0]);
             end.setHours(0,0,0,0);
@@ -591,6 +620,7 @@
             transition: opacity 0.4s;
             font-size: 15px;
             text-align: center;
+            max-width: 90%;
         `;
         toast.textContent = message;
         document.body.appendChild(toast);
@@ -602,16 +632,11 @@
     }
 
     // ===== ربط الأحداث =====
-    // زر احسب
-    calculateBtn.addEventListener('click', function() {
-        addVacation();
-    });
+    calculateBtn.addEventListener('click', addVacation);
 
-    // حساب تلقائي عند تغيير التاريخ أو عدد الأيام (معاينة فقط)
     startDate.addEventListener('change', calculateReturnDate);
     daysCount.addEventListener('input', calculateReturnDate);
 
-    // الضغط على Enter في أي حقل ينفذ الإضافة
     document.querySelectorAll('#empName, #startDate, #daysCount').forEach(input => {
         input.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
