@@ -1,4 +1,4 @@
-حج<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -83,6 +83,7 @@
         .badge-type.maternity { background: #fce4ec; color: #880e4f; }
         .badge-type.study { background: #e3f2fd; color: #0d47a1; }
         .badge-type.unpaid { background: #e2e3e5; color: #383d41; }
+        .badge-type.other { background: #e8e8e8; color: #555; }
         .badge-type.default { background: #e9ecef; color: #495057; }
         .btn-delete { background: #e74c3c; color: white; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; transition: 0.3s; }
         .btn-delete:hover { background: #c0392b; transform: scale(1.05); }
@@ -147,14 +148,11 @@
             <div class="form-group">
                 <label>📂 نوع الاجازة <span class="manual">(يدوي)</span></label>
                 <select id="leaveType">
-                    <option value="اعتيادي">اعتيادي</option>
-                    <option
-value="مرضية">مرضية</option>
-                    <option value="امومة">امومة</option>
+                    <option value="اعتيادية">اعتيادية</option>
+                    <option value="مرضية">مرضية</option>
                     <option value="وضع">وضع</option>
                     <option value="بدون راتب">بدون راتب</option>
-            </option
-value="عدة">عدة</option>
+                    <option value="اخرى">اخرى</option>
                 </select>
             </div>
             <div class="form-group">
@@ -180,11 +178,11 @@ value="عدة">عدة</option>
             <label>📂 نوع الاجازة</label>
             <select id="filterType">
                 <option value="الكل">الكل</option>
-                <option value="اعتيادي">اعتيادي</option>
+                <option value="اعتيادية">اعتيادية</option>
                 <option value="مرضية">مرضية</option>
-                <option value="امومة">امومة</option>
-                <option value="دراسية">دراسية</option>
+                <option value="وضع">وضع</option>
                 <option value="بدون راتب">بدون راتب</option>
+                <option value="اخرى">اخرى</option>
             </select>
         </div>
         <button class="btn-filter" onclick="applyFilters()">🔍 تطبيق الفلتر</button>
@@ -240,9 +238,6 @@ value="عدة">عدة</option>
     let isLoading = false;
     let isFiltered = false;
 
-    // ============================================
-    // 📢 دوال الإشعارات والحالة
-    // ============================================
     function showToast(message, type = 'info') {
         const toast = document.getElementById('toast');
         toast.textContent = message;
@@ -261,197 +256,80 @@ value="عدة">عدة</option>
     }
 
     // ============================================
-    // 📅 دوال معالجة التاريخ (محسنة)
+    // 🔥 دوال معالجة التاريخ - بدون استخدام Date
     // ============================================
 
-    // ===== دالة تنظيف التاريخ من أي طابع زمني =====
     function cleanDate(dateStr) {
         if (!dateStr) return '';
-        
         if (dateStr.includes('T')) dateStr = dateStr.split('T')[0];
         if (dateStr.includes(' ')) dateStr = dateStr.split(' ')[0];
-        
         if (dateStr.includes('-')) {
             const parts = dateStr.split('-');
-            if (parts.length === 3) {
-                return `${parts[2]}/${parts[1]}/${parts[0]}`;
-            }
+            if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
         }
-        
         if (dateStr.includes('/')) {
             const parts = dateStr.split('/');
             if (parts.length === 3 && parts[0].length === 4) {
                 return `${parts[2]}/${parts[1]}/${parts[0]}`;
             }
         }
-        
         return dateStr;
     }
 
-    // ===== دالة إضافة أيام إلى تاريخ =====
     function addDaysToDate(dateStr, daysToAdd) {
         if (!dateStr || !daysToAdd) return '';
-        
         const cleaned = cleanDate(dateStr);
         const parts = cleaned.split('/');
-        
         if (parts.length !== 3) return '';
         
         let day = parseInt(parts[0]);
         let month = parseInt(parts[1]);
         let year = parseInt(parts[2]);
-        
         day += daysToAdd;
         
         const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-        
-        function isLeapYear(y) {
-            return (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
-        }
+        function isLeapYear(y) { return (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0); }
         
         while (day > daysInMonth[month - 1] + (month === 2 && isLeapYear(year) ? 1 : 0)) {
             const maxDay = daysInMonth[month - 1] + (month === 2 && isLeapYear(year) ? 1 : 0);
             day -= maxDay;
             month++;
-            if (month > 12) {
-                month = 1;
-                year++;
-            }
+            if (month > 12) { month = 1; year++; }
         }
         
-        return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${String(year)}`;
+        return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
     }
 
-    // ===== دالة تنسيق التاريخ للعرض (مع إضافة 1 للتعويض عن فقدان اليوم) =====
     function formatDateForDisplay(dateStr) {
         if (!dateStr) return '—';
-        
-        var day, month, year;
-        var originalDate = dateStr;
-        
-        // تنظيف التاريخ
-        var cleaned = dateStr;
-        if (cleaned.includes('T')) cleaned = cleaned.split('T')[0];
-        if (cleaned.includes(' ')) cleaned = cleaned.split(' ')[0];
-        
-        // التعرف على الصيغة
-        if (cleaned.match(/^\d{4}-\d{2}-\d{2}$/)) {
-            var parts = cleaned.split('-');
-            year = parseInt(parts[0]);
-            month = parseInt(parts[1]);
-            day = parseInt(parts[2]);
-        }
-        else if (cleaned.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
-            var parts = cleaned.split('/');
-            day = parseInt(parts[0]);
-            month = parseInt(parts[1]);
-            year = parseInt(parts[2]);
-        }
-        else {
-            return cleaned;
-        }
-        
-        // ✅ إضافة 1 إلى اليوم للتعويض عن فقدان اليوم
-        day = day + 1;
-        
-        // التعامل مع نهاية الشهر
-        var daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-        function isLeapYear(y) {
-            return (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
-        }
-        if (month === 2 && isLeapYear(year)) {
-            daysInMonth[1] = 29;
-        }
-        
-        if (day > daysInMonth[month - 1]) {
-            day = 1;
-            month++;
-            if (month > 12) {
-                month = 1;
-                year++;
-            }
-        }
-        
-        // تنسيق النتيجة
-        var resultDay = String(day).padStart(2, '0');
-        var resultMonth = String(month).padStart(2, '0');
-        var resultYear = String(year);
-        
-        return resultDay + '/' + resultMonth + '/' + resultYear;
+        const cleaned = cleanDate(dateStr);
+        return cleaned || '—';
     }
 
-    // ===== دالة تحويل التاريخ من DD/MM/YYYY إلى YYYY-MM-DD =====
     function convertToStorageFormat(dateStr) {
         if (!dateStr) return '';
-        
         if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) return dateStr;
-        
-        if (dateStr.includes('T')) dateStr = dateStr.split('T')[0];
-        if (dateStr.includes(' ')) dateStr = dateStr.split(' ')[0];
-        
         const parts = dateStr.split('/');
-        if (parts.length === 3) {
-            const day = parseInt(parts[0]);
-            const month = parseInt(parts[1]);
-            const year = parseInt(parts[2]);
-            
-            if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
-                return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            }
-        }
-        
+        if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
         return dateStr;
     }
 
-    // ===== دالة للتحقق من صحة التاريخ =====
-    function isValidDate(dateStr) {
-        if (!dateStr) return false;
-        const cleaned = cleanDate(dateStr);
-        const parts = cleaned.split('/');
-        if (parts.length !== 3) return false;
-        
-        const day = parseInt(parts[0]);
-        const month = parseInt(parts[1]);
-        const year = parseInt(parts[2]);
-        
-        if (isNaN(day) || isNaN(month) || isNaN(year)) return false;
-        if (month < 1 || month > 12) return false;
-        if (day < 1 || day > 31) return false;
-        
-        const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-        const maxDay = daysInMonth[month - 1] + (month === 2 && ((year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)) ? 1 : 0);
-        return day <= maxDay;
-    }
-
-    // ============================================
-    // 🏷️ دوال المساعدة
-    // ============================================
+    // ===== تحديث دالة getTypeClass للأنواع الجديدة =====
     function getTypeClass(type) {
         const map = {
-            'اعتيادي': 'seniority',
+            'اعتيادية': 'seniority',
             'مرضية': 'sick',
-            'امومة': 'maternity',
-            'دراسية': 'study',
-            'بدون راتب': 'unpaid'
+            'وضع': 'maternity',
+            'بدون راتب': 'unpaid',
+            'اخرى': 'other'
         };
         return map[type] || 'default';
     }
 
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    // ============================================
-    // 📊 حساب تاريخ المباشرة
-    // ============================================
     function calculateReturnDate() {
         const leaveDate = document.getElementById('leaveDate').value;
         const days = parseInt(document.getElementById('daysCount').value) || 0;
         const returnInput = document.getElementById('returnDate');
-
         if (leaveDate && days > 0) {
             returnInput.value = addDaysToDate(leaveDate, days);
         } else {
@@ -459,9 +337,7 @@ value="عدة">عدة</option>
         }
     }
 
-    // ============================================
-    // 📅 إعداد التقويم
-    // ============================================
+    // ===== إعداد التقويم =====
     $(document).ready(function() {
         $('#leaveDate').datepicker({
             changeMonth: true,
@@ -500,9 +376,7 @@ value="عدة">عدة</option>
 
     document.getElementById('daysCount').addEventListener('input', calculateReturnDate);
 
-    // ============================================
-    // 📋 عرض الجدول
-    // ============================================
+    // ===== عرض الجدول =====
     function renderTable(data) {
         const tbody = document.getElementById('leaveTableBody');
         const displayData = data || (isFiltered ? filteredLeaves : leaves);
@@ -515,12 +389,12 @@ value="عدة">عدة</option>
                 return `
                     <tr>
                         <td>${index + 1}</td>
-                        <td><strong>${escapeHtml(leave.name)}</strong></td>
+                        <td><strong>${leave.name}</strong></td>
                         <td>${formatDateForDisplay(leave.leaveDate)}</td>
                         <td><span style="font-weight:700;color:#1a5276;">${leave.days}</span></td>
                         <td style="color:#27ae60;font-weight:600;">${formatDateForDisplay(leave.returnDate)}</td>
-                        <td><span class="badge-type ${typeClass}">${escapeHtml(leave.type)}</span></td>
-                        <td style="max-width:120px;font-size:12px;color:#6c757d;">${escapeHtml(leave.notes || '—')}</td>
+                        <td><span class="badge-type ${typeClass}">${leave.type}</span></td>
+                        <td style="max-width:120px;font-size:12px;color:#6c757d;">${leave.notes || '—'}</td>
                         <td><button class="btn-delete" onclick="deleteFromDatabase(${leave.id})">🗑️ حذف</button></td>
                     </tr>
                 `;
@@ -535,9 +409,7 @@ value="عدة">عدة</option>
         document.getElementById('totalDays').textContent = totalDays;
     }
 
-    // ============================================
-    // 🔍 دوال الفلترة
-    // ============================================
+    // ===== دوال الفلترة =====
     function applyFilters() {
         const fromDate = document.getElementById('filterFrom').value;
         const toDate = document.getElementById('filterTo').value;
@@ -572,40 +444,22 @@ value="عدة">عدة</option>
         else clearFilters();
     });
 
-    // ============================================
-    // 🌐 الاتصال بقاعدة البيانات
-    // ============================================
+    // ===== الاتصال بقاعدة البيانات =====
     async function makeRequest(action, data) {
         try {
             const params = new URLSearchParams();
             params.append('action', action);
             if (data) params.append('data', JSON.stringify(data));
             const url = API_URL + '?' + params.toString();
-            
-            console.log('📤 إرسال طلب:', action, data);
-            
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: { 'Accept': 'application/json' }
-            });
-            
+            const response = await fetch(url);
             const text = await response.text();
-            console.log('📥 استجابة:', text);
-            
-            try { 
-                return JSON.parse(text); 
-            } catch (e) { 
-                return { success: false, message: 'خطأ في تحليل البيانات: ' + text.substring(0, 100) }; 
-            }
+            try { return JSON.parse(text); } catch (e) { return { success: false, message: 'خطأ في تحليل البيانات' }; }
         } catch (error) {
-            console.error('❌ خطأ في الاتصال:', error);
             return { success: false, message: 'خطأ في الاتصال: ' + error.message };
         }
     }
 
-    // ============================================
-    // ➕ إضافة إلى قاعدة البيانات
-    // ============================================
+    // ===== إضافة إلى قاعدة البيانات =====
     async function addToDatabase() {
         const name = document.getElementById('employeeName').value.trim();
         const leaveDateRaw = document.getElementById('leaveDate').value;
@@ -621,10 +475,6 @@ value="عدة">عدة</option>
 
         const leaveDateCleaned = cleanDate(leaveDateRaw);
         const returnDateCleaned = cleanDate(returnDateRaw);
-        
-        if (!isValidDate(leaveDateCleaned)) { showToast('⚠️ تاريخ الاجازة غير صحيح', 'error'); return; }
-        if (!isValidDate(returnDateCleaned)) { showToast('⚠️ تاريخ المباشرة غير صحيح', 'error'); return; }
-        
         const leaveDateStorage = convertToStorageFormat(leaveDateCleaned);
         const returnDateStorage = convertToStorageFormat(returnDateCleaned);
 
@@ -645,7 +495,7 @@ value="عدة">عدة</option>
                 document.getElementById('daysCount').value = '';
                 document.getElementById('returnDate').value = '';
                 document.getElementById('notes').value = '';
-                if (isFiltered) clearFilters();
+                clearFilters();
             } else {
                 showToast('❌ ' + (result.message || 'فشل الحفظ'), 'error');
             }
@@ -657,9 +507,7 @@ value="عدة">عدة</option>
         }
     }
 
-    // ============================================
-    // 📥 تحميل من قاعدة البيانات
-    // ============================================
+    // ===== تحميل من قاعدة البيانات =====
     async function loadFromDatabase() {
         if (isLoading) return;
         isLoading = true;
@@ -686,9 +534,7 @@ value="عدة">عدة</option>
         }
     }
 
-    // ============================================
-    // 🔄 تحديث البيانات
-    // ============================================
+    // ===== تحديث البيانات =====
     async function refreshData() {
         const btn = document.getElementById('refreshBtn');
         btn.disabled = true;
@@ -699,16 +545,12 @@ value="عدة">عدة</option>
         showToast('✅ تم تحديث البيانات بنجاح', 'success');
     }
 
-    // ============================================
-    // 🗑️ حذف من قاعدة البيانات
-    // ============================================
+    // ===== حذف من قاعدة البيانات =====
     async function deleteFromDatabase(id) {
         if (!confirm('⚠️ هل أنت متأكد من حذف هذه الإجازة؟')) return;
-        const btn = event && event.target ? event.target : document.querySelector(`button[onclick*="deleteFromDatabase(${id})"]`);
-        if (btn) {
-            btn.disabled = true;
-            btn.textContent = '⏳ جاري...';
-        }
+        const btn = event.target;
+        btn.disabled = true;
+        btn.textContent = '⏳ جاري...';
 
         try {
             const result = await makeRequest('deleteLeave', { id });
@@ -722,16 +564,12 @@ value="عدة">عدة</option>
         } catch (error) {
             showToast('❌ خطأ في الاتصال', 'error');
         } finally {
-            if (btn) {
-                btn.disabled = false;
-                btn.textContent = '🗑️ حذف';
-            }
+            btn.disabled = false;
+            btn.textContent = '🗑️ حذف';
         }
     }
 
-    // ============================================
-    // 📄 تصدير إلى Word
-    // ============================================
+    // ===== تصدير إلى Word =====
     function exportToWord() {
         const data = isFiltered ? filteredLeaves : leaves;
         if (data.length === 0) {
@@ -764,12 +602,12 @@ value="عدة">عدة</option>
             html += `
                 <tr>
                     <td>${index + 1}</td>
-                    <td>${escapeHtml(leave.name)}</td>
+                    <td>${leave.name}</td>
                     <td>${formatDateForDisplay(leave.leaveDate)}</td>
                     <td>${leave.days}</td>
                     <td>${formatDateForDisplay(leave.returnDate)}</td>
-                    <td>${escapeHtml(leave.type)}</td>
-                    <td>${escapeHtml(leave.notes || '—')}</td>
+                    <td>${leave.type}</td>
+                    <td>${leave.notes || '—'}</td>
                 </tr>
             `;
         });
@@ -782,24 +620,18 @@ value="عدة">عدة</option>
             </body></html>
         `;
 
-        try {
-            const blob = new Blob(['\uFEFF' + html], { type: 'application/msword;charset=utf-8' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `تقرير_الإجازات_${new Date().toISOString().slice(0,10)}.doc`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(link.href);
-            showToast('✅ تم حفظ التقرير بصيغة Word بنجاح', 'success');
-        } catch (error) {
-            showToast('❌ خطأ في تصدير التقرير', 'error');
-        }
+        const blob = new Blob([html], { type: 'application/msword;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `تقرير_الإجازات_${new Date().toISOString().slice(0,10)}.doc`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+        showToast('✅ تم حفظ التقرير بصيغة Word بنجاح', 'success');
     }
 
-    // ============================================
-    // 🔌 اختبار الاتصال
-    // ============================================
+    // ===== اختبار الاتصال =====
     async function testConnection() {
         try {
             const result = await makeRequest('testConnection', null);
@@ -808,9 +640,7 @@ value="عدة">عدة</option>
         } catch { setStatus('offline'); return false; }
     }
 
-    // ============================================
-    // 🚀 تحميل الصفحة
-    // ============================================
+    // ===== تحميل الصفحة =====
     window.onload = async function() {
         console.log('📋 نظام إدارة الإجازات - ديوان محافظة');
         console.log('🔗 API URL:', API_URL);
